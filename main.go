@@ -29,7 +29,7 @@ type Resolution struct {
 	YellowCheck    [2]int         //Yellow coords
 	GreenCheck     [2]int         //Green coors
 	InventorySlots [][2]int       //locations of items
-	DropPoint      [2]int         //Where items are dropped
+	DropPoint      [2]int         //Where items are dropped - changed to hero pic
 	FishingSpots   map[int][2]int // key = tier, value = {x,y} coords for that tier's fishing spot
 }
 
@@ -55,7 +55,7 @@ var resolutions = map[string]Resolution{
 			{2390, 1940},
 			{2535, 1940},
 		},
-		DropPoint: [2]int{1892, 874},
+		DropPoint: [2]int{1396, 1896},
 		FishingSpots: map[int][2]int{
 			1: {920, 2112},
 			2: {797, 1972},
@@ -75,7 +75,7 @@ var resolutions = map[string]Resolution{
 			{1597, 1293},
 			{1691, 1293},
 		},
-		DropPoint: [2]int{1263, 579},
+		DropPoint: [2]int{927, 1268},
 		FishingSpots: map[int][2]int{
 			1: {603, 1408},
 			2: {531, 1314},
@@ -95,7 +95,7 @@ var resolutions = map[string]Resolution{
 			{1197, 967},
 			{1270, 967},
 		},
-		DropPoint: [2]int{949, 434},
+		DropPoint: [2]int{695, 950},
 		FishingSpots: map[int][2]int{
 			1: {460, 1056},
 			2: {396, 986},
@@ -111,8 +111,8 @@ func initGL() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to initialize glfw:", err)
 	}
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 6)
+	glfw.WindowHint(glfw.ContextVersionMajor, 3)
+	glfw.WindowHint(glfw.ContextVersionMinor, 3)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCompatProfile)
 	glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
 	glfw.WindowHint(glfw.Decorated, glfw.False)
@@ -443,95 +443,3 @@ func waitInterruptible(d time.Duration, checkInterval time.Duration) bool {
 	}
 	return true
 }
-
-/*
-func getRGB(c color.Color) (uint32, uint32, uint32) {
-	r, g, b, _ := color.RGBAModel.Convert(c).RGBA()
-	return r >> 8, g >> 8, b >> 8
-}
-
-func isBlack(x, y int, bounds image.Rectangle) bool {
-	img, err := screenshot.CaptureRect(bounds)
-	if err != nil {
-		log.Printf("Screen capture failed: %v", err)
-		return false
-	}
-	r, g, b := getRGB(img.At(x, y))
-	return r == 0 && g == 0 && b == 0
-}
-
-func isYellowish(r, g, b uint32) bool {
-	return r > 180 && g > 180 && b < 100
-}
-
-func isGreenish(r, g, b uint32) bool {
-	return g > 180 && r < 150 && b < 150
-}
-
-func isRedish(r, g, b uint32) bool {
-	return r > 180 && g < 120 && b < 120
-}
-
-func dropAllFish(deaths, screenWidth, screenHeight int) int {
-	if deaths >= 4 {
-		fmt.Print("Dropping Fish")
-		robotgo.KeyTap("f1")
-		robotgo.KeyTap("f1")
-
-		//using 3840x2160 res
-		//slot 1 x2390 y1800
-		//slot 3 x2390 y1940
-		//slot 4 x2535 y1940
-
-		// Inventory slots (right click)
-		x := int(float64(screenWidth) * 0.6223)
-		y := int(float64(screenHeight) * 0.8333)
-		robotgo.Move(x, y)
-		robotgo.Click("right")
-
-		//Just below hero
-		x = int(float64(screenWidth) * 0.4961)
-		y = int(float64(screenHeight) * 0.4083)
-		robotgo.Move(x, y)
-		robotgo.Click()
-
-		x = int(float64(screenWidth) * 0.6223)
-		y = int(float64(screenHeight) * 0.8981)
-		robotgo.Move(x, y)
-		robotgo.Click("right")
-
-		//Just below hero
-		x = int(float64(screenWidth) * 0.4961)
-		y = int(float64(screenHeight) * 0.4083)
-		robotgo.Move(x, y)
-		robotgo.Click()
-
-		x = int(float64(screenWidth) * 0.6601)
-		y = int(float64(screenHeight) * 0.8981)
-		robotgo.Move(x, y)
-		robotgo.Click("right")
-
-		//Just below hero
-		x = int(float64(screenWidth) * 0.4961)
-		y = int(float64(screenHeight) * 0.4083)
-		robotgo.Move(x, y)
-		robotgo.Click()
-
-		time.Sleep(1 * time.Second)
-		deaths = 0
-	}
-	return deaths
-}
-
-func waitInterruptible(d time.Duration, checkInterval time.Duration) bool {
-	elapsed := time.Duration(0)
-	for elapsed < d {
-		if !enabled {
-			return false
-		}
-		time.Sleep(checkInterval)
-		elapsed += checkInterval
-	}
-	return true
-}
-*/
