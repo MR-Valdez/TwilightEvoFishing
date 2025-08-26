@@ -13,9 +13,14 @@ A transparent, always-on-top overlay with interactive keyboard/mouse control tha
 * 🐟 Detects hero death and item drops
 * ⌨️ Hotkey Controls:
 
-  * `Ctrl+F8` - Toggle bot ON/OFF
+  * `Alt+F6` - Toggle ManaRefresh Off/12s/15s (Only works with slot 2 currently)
+  * `Ctrl+F6` - Dodge Imp2 Arrows Toggle
+  * `Ctrl+F8` - Toggle Fishing ON/OFF
   * `Ctrl+F7` - Cycle fishing Tiers
-  * `Mouse Middle Click` - Print current mouse coordinates (for new resolution mapping)
+
+  * `Mouse Middle Click` - Can be configured to do two different things used for new resolution mapping
+    * Print current mouse coordinates (for new resolution mapping)
+    * Printscreen to identify scrolling combat(Like Dodge coordinate identification)
 
 ---
 

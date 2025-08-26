@@ -1,4 +1,4 @@
-module example.com/m
+module TwilightEvoApp
 
 go 1.24.5
 
