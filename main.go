@@ -389,6 +389,9 @@ func runFishingBotLogic() {
 			continue
 		}
 		resolution = res
+		logDebug("YellowCheck Coords x:%v y:%v", resolution.YellowCheck[0], resolution.YellowCheck[1])
+		logDebug("GreenCheck Coords x:%v y:%v", resolution.GreenCheck[0], resolution.GreenCheck[1])
+		logDebug("MoveCheck Coords x:%v y:%v", resolution.MoveCheck[0], resolution.MoveCheck[1])
 
 		if currentTier != lastTier {
 			fmt.Printf("⬆️  Tier changed to %d — dropping fish...\n", currentTier)
@@ -405,6 +408,7 @@ func runFishingBotLogic() {
 
 		heroCheckx := resolution.HeroCheck[0]
 		heroChecky := resolution.HeroCheck[1]
+		logDebug("HeroCheck Coords x:%v y:%v", heroCheckx, heroChecky)
 		waitUntilFocused()
 		if utils.IsBlack(heroCheckx, heroChecky, screenBounds) {
 			fmt.Println("⚠️ Hero is dead or not selected. Retrying...")
@@ -430,6 +434,7 @@ func runFishingBotLogic() {
 		// Move to fishing spot
 		fishX, fishY := resolution.FishingSpots[currentTier][0], resolution.FishingSpots[currentTier][1]
 		waitUntilFocused()
+		logDebug("Move Mouse Coords x:%v y:%v", fishX, fishY)
 		robotgo.Move(fishX, fishY, 0)
 		robotgo.Click("right")
 
@@ -634,11 +639,13 @@ func dropAllFish(deaths, screenWidth, screenHeight int) int {
 		for _, slot := range resolution.InventorySlots {
 			waitUntilFocused()
 			x, y := slot[0], slot[1]
+			logDebug("Inventory Mouse Coords x:%v y:%v", x, y)
 			robotgo.Move(x, y)
 			robotgo.Click("right")
 
 			waitUntilFocused()
 			dx, dy := resolution.DropPoint[0], resolution.DropPoint[1]
+			logDebug("InventoryHero Mouse Coords x:%v y:%v", x, y)
 			robotgo.Move(dx, dy)
 			robotgo.Click()
 		}
