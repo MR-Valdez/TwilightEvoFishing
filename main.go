@@ -327,8 +327,10 @@ func hookLogic() {
 						lastActionTime = time.Now()
 					} else if ev.Rawcode == 13 || (typing && ev.Rawcode == 27) { //enter or esc
 						typing = !typing
+					} else if ev.Keycode == 60999 { //Home key
+						printDebugInfo()
 					} else {
-						fmt.Printf("Hook: %v %v %v\n", ev.Rawcode, ev.Mask, ev.Keycode)
+						logDebug("Hook: %v %v %v\n", ev.Rawcode, ev.Mask, ev.Keycode)
 					}
 				case hook.MouseDown:
 					if ev.Button == hook.MouseMap["center"] {
