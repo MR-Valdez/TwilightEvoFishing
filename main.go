@@ -102,8 +102,8 @@ var resolutions = map[string]Resolution{
 		Width: 2560, Height: 1440,
 		MoveCheck:   [2]int{1856, 1145},
 		HeroCheck:   [2]int{1114, 1266},
-		YellowCheck: [2]int{609, 834},
-		GreenCheck:  [2]int{610, 836},
+		YellowCheck: [2]int{608, 833},
+		GreenCheck:  [2]int{608, 833},
 		InventorySlots: [][2]int{
 			{1597, 1200},
 			{1597, 1293},
@@ -111,10 +111,10 @@ var resolutions = map[string]Resolution{
 		},
 		DropPoint: [2]int{927, 1268},
 		FishingSpots: map[int][2]int{
-			1: {603, 1408},
-			2: {531, 1314},
-			3: {545, 1288},
-			4: {466, 1174},
+			1: {632, 1402},
+			2: {531, 1312},
+			3: {547, 1288},
+			4: {465, 1172},
 			5: {392, 1394},
 		},
 		DodgeArrows: map[string][][]int{
@@ -435,8 +435,11 @@ func runFishingBotLogic() {
 		fishX, fishY := resolution.FishingSpots[currentTier][0], resolution.FishingSpots[currentTier][1]
 		waitUntilFocused()
 		logDebug("Move Mouse Coords x:%v y:%v", fishX, fishY)
-		robotgo.Move(fishX, fishY, 0)
-		robotgo.Click("right")
+		for range [3]struct{}{} {
+			robotgo.Move(fishX, fishY, 0)
+			robotgo.Click("right")
+			time.Sleep(200 * time.Millisecond)
+		}
 
 		if !utils.WaitInterruptible(&fishing, time.Duration(tiers[currentTier].WaitSec)*time.Second, 250*time.Millisecond) {
 			fmt.Println("⏹️  Wait interrupted due to pause")
