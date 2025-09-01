@@ -68,6 +68,7 @@ var (
 	resolution          Resolution
 	actions             = []uint16{16, 17, 18, 19, 30}
 	lastActionTime      = time.Now()
+	dpiScale            = 0
 )
 
 var resolutions = map[string]Resolution{
@@ -227,8 +228,10 @@ func renderOverlayLoop(window *glfw.Window) {
 		screenWidth := screenBounds.Dx()
 		screenHeight := screenBounds.Dy()
 
+		dpiScale = utils.GetWindowDPI()
+
 		if screenWidth != prevWidth || screenHeight != prevHeight {
-			winWidth := int(float64(screenWidth) * 0.095)
+			winWidth := int(float64(screenWidth) * 0.096)
 			winHeight := int(float64(screenHeight) * 0.06)
 			window.SetSize(winWidth, winHeight)
 			window.SetPos(int(float64(screenWidth)*0.05), int(float64(screenHeight)*0.05))
@@ -391,9 +394,9 @@ func runFishingBotLogic() {
 			continue
 		}
 		resolution = res
-		logDebug("YellowCheck Coords x:%v y:%v", resolution.YellowCheck[0], resolution.YellowCheck[1])
-		logDebug("GreenCheck Coords x:%v y:%v", resolution.GreenCheck[0], resolution.GreenCheck[1])
-		logDebug("MoveCheck Coords x:%v y:%v", resolution.MoveCheck[0], resolution.MoveCheck[1])
+		logDebug("YellowCheck Unscaled Coords x:%v y:%v", resolution.YellowCheck[0], resolution.YellowCheck[1])
+		logDebug("GreenCheck Unscaled Coords x:%v y:%v", resolution.GreenCheck[0], resolution.GreenCheck[1])
+		logDebug("MoveCheck Unscaled Coords x:%v y:%v", resolution.MoveCheck[0], resolution.MoveCheck[1])
 
 		if currentTier != lastTier {
 			fmt.Printf("⬆️  Tier changed to %d — dropping fish...\n", currentTier)
@@ -408,8 +411,7 @@ func runFishingBotLogic() {
 		robotgo.KeyTap("f1")
 		time.Sleep(500 * time.Millisecond)
 
-		heroCheckx := resolution.HeroCheck[0]
-		heroChecky := resolution.HeroCheck[1]
+		heroCheckx, heroChecky := utils.ScaleCoords(resolution.HeroCheck[0], resolution.HeroCheck[1], dpiScale)
 		logDebug("HeroCheck Coords x:%v y:%v", heroCheckx, heroChecky)
 		waitUntilFocused()
 		if utils.IsBlack(heroCheckx, heroChecky, screenBounds) {
@@ -434,7 +436,8 @@ func runFishingBotLogic() {
 		deaths = dropAllFish(deaths, screenWidth, screenHeight)
 
 		// Move to fishing spot
-		fishX, fishY := resolution.FishingSpots[currentTier][0], resolution.FishingSpots[currentTier][1]
+		fishX, fishY := utils.ScaleCoords(resolution.FishingSpots[currentTier][0], resolution.FishingSpots[currentTier][1], dpiScale)
+
 		waitUntilFocused()
 		logDebug("Move Mouse Coords x:%v y:%v", fishX, fishY)
 		for range [3]struct{}{} {
@@ -463,9 +466,9 @@ func runFishingBotLogic() {
 				continue
 			}
 
-			r1, g1, b1 := utils.GetRGB(img.At(resolution.YellowCheck[0], resolution.YellowCheck[1]))
-			r2, g2, b2 := utils.GetRGB(img.At(resolution.GreenCheck[0], resolution.GreenCheck[1]))
-			rm, gm, bm := utils.GetRGB(img.At(resolution.MoveCheck[0], resolution.MoveCheck[1]))
+			r1, g1, b1 := utils.GetRGB(img.At(utils.ScaleCoords(resolution.YellowCheck[0], resolution.YellowCheck[1], dpiScale)))
+			r2, g2, b2 := utils.GetRGB(img.At(utils.ScaleCoords(resolution.GreenCheck[0], resolution.GreenCheck[1], dpiScale)))
+			rm, gm, bm := utils.GetRGB(img.At(utils.ScaleCoords(resolution.MoveCheck[0], resolution.MoveCheck[1], dpiScale)))
 
 			if utils.IsYellowish(r1, g1, b1) {
 				fmt.Println("🎯 Yellow detected → pressing UP")
@@ -534,23 +537,23 @@ func runDodgeArrowLogic() {
 				continue
 			}
 
-			if utils.IsRedish(utils.GetRGB(img.At(resolution.DodgeArrows["red"][0][0], resolution.DodgeArrows["red"][0][1]))) {
-				if utils.CheckDodge(img, resolution.DodgeArrows["up"]) {
+			if utils.IsRedish(utils.GetRGB(img.At(utils.ScaleCoords(resolution.DodgeArrows["red"][0][0], resolution.DodgeArrows["red"][0][1], dpiScale)))) {
+				if utils.CheckDodge(img, resolution.DodgeArrows["up"], dpiScale) {
 					fmt.Println("🎯 Up detected → pressing UP")
 					robotgo.KeyTap("up")
 					robotgo.KeyTap("down")
 					robotgo.KeyTap("esc")
-				} else if utils.CheckDodge(img, resolution.DodgeArrows["down"]) {
+				} else if utils.CheckDodge(img, resolution.DodgeArrows["down"], dpiScale) {
 					fmt.Println("🎯 Down detected → pressing DOWN")
 					robotgo.KeyTap("down")
 					robotgo.KeyTap("up")
 					robotgo.KeyTap("esc")
-				} else if utils.CheckDodge(img, resolution.DodgeArrows["left"]) {
+				} else if utils.CheckDodge(img, resolution.DodgeArrows["left"], dpiScale) {
 					fmt.Println("🎯 Left detected → pressing LEFT")
 					robotgo.KeyTap("left")
 					robotgo.KeyTap("right")
 					robotgo.KeyTap("esc")
-				} else if utils.CheckDodge(img, resolution.DodgeArrows["right"]) {
+				} else if utils.CheckDodge(img, resolution.DodgeArrows["right"], dpiScale) {
 					fmt.Println("🎯 Right detected → pressing RIGHT")
 					robotgo.KeyTap("right")
 					robotgo.KeyTap("left")
@@ -649,7 +652,7 @@ func dropAllFish(deaths, screenWidth, screenHeight int) int {
 			robotgo.Click("right")
 
 			waitUntilFocused()
-			dx, dy := resolution.DropPoint[0], resolution.DropPoint[1]
+			dx, dy := utils.ScaleCoords(resolution.DropPoint[0], resolution.DropPoint[1], dpiScale)
 			logDebug("InventoryHero Mouse Coords x:%v y:%v", x, y)
 			robotgo.Move(dx, dy)
 			robotgo.Click()

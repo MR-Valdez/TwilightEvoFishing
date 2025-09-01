@@ -8,7 +8,8 @@ A transparent, always-on-top overlay with interactive keyboard/mouse control tha
 
 * ✅ Transparent overlay HUD using OpenGL
 * 👡 Detects in-game visual cues (yellow, green, red, black pixels)
-* 📊 Multi-resolution support (4K, 1440p, 1080p)
+* 📊 Multi-resolution support (4K, 1440p, 1080p) 
+* 🔍 DPI Scaling Supported
 * 🧠 Automatically selects fishing spots based on Tier Selected
 * 🐟 Detects hero death and item drops
 * ⌨️ Hotkey Controls:

@@ -4,9 +4,11 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"syscall"
 	"time"
 
 	"github.com/kbinani/screenshot"
+	"github.com/lxn/win"
 )
 
 func GetRGB(c color.Color) (uint32, uint32, uint32) {
@@ -48,13 +50,38 @@ func WaitInterruptible(check *bool, d time.Duration, checkInterval time.Duration
 	return true
 }
 
-func CheckDodge(img *image.RGBA, coords [][]int) bool {
+func CheckDodge(img *image.RGBA, coords [][]int, dpiScale int) bool {
 	coordCount := len(coords)
 	matchCount := 0
 	for _, coordPair := range coords {
-		if IsYellowish(GetRGB(img.At(coordPair[0], coordPair[1]))) {
+		if IsYellowish(GetRGB(img.At(ScaleCoords(coordPair[0], coordPair[1], dpiScale)))) {
 			matchCount++
 		}
 	}
 	return coordCount == matchCount
+}
+
+func GetWindowDPI() int {
+	// Windows 10+ API
+	title, err := syscall.UTF16PtrFromString("Warcraft III")
+	if err != nil {
+		return 96
+	}
+
+	hwnd := win.FindWindow(nil, title)
+	if hwnd == 0 {
+		return 96
+	}
+
+	dpi := win.GetDpiForWindow(hwnd)
+	if dpi == 0 {
+		// fallback for older systems
+		dpi = 96
+	}
+	return int(dpi)
+}
+
+func ScaleCoords(x, y int, dpi int) (int, int) {
+	scale := float64(dpi) / 96.0
+	return int(float64(x) * scale), int(float64(y) * scale)
 }
