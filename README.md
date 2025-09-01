@@ -80,11 +80,13 @@ You can extend support for more resolutions by adding new entries to the `resolu
 
 ## 📋 Controls Summary
 
-| Action                | Input                |
-| --------------------- | -------------------- |
-| Toggle Bot ON/OFF     | `Ctrl + F8`          |
-| Change Fishing Tier   | `Ctrl + F7`          |
-| Log Mouse Coordinates | `Middle Mouse Click` |
+| Action                   | Input                |
+| ---------------------    | -------------------- |
+| Toggle Fishing Toggle    | `Ctrl + F8`          |
+| Change Fishing Tier      | `Ctrl + F7`          |
+| Dodge Arrows Toggle      | `Ctrl + F6`          |
+| Mana Refresh 12s/15s/Off | `Alt + F6`           |
+| Log Mouse Coordinates    | `Middle Mouse Click` |
 
 ---
 
