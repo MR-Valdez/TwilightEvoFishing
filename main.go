@@ -102,7 +102,7 @@ var resolutions = map[string]Resolution{
 	"2560x1440": {
 		Width: 2560, Height: 1440,
 		MoveCheck:   [2]int{1856, 1145},
-		HeroCheck:   [2]int{1114, 1266},
+		HeroCheck:   [2]int{1113, 1270},
 		YellowCheck: [2]int{608, 833},
 		GreenCheck:  [2]int{608, 833},
 		InventorySlots: [][2]int{
