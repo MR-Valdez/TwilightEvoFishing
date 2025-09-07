@@ -16,8 +16,10 @@ func GetRGB(c color.Color) (uint32, uint32, uint32) {
 	return r >> 8, g >> 8, b >> 8
 }
 
-func IsBlack(x, y int, bounds image.Rectangle) bool {
-	img, err := screenshot.CaptureRect(bounds)
+func IsBlack(x, y int, bounds image.Rectangle, dpi int) bool {
+	scaledBoundsx, scaledBoundsy := ScaleCoords(bounds.Dx(), bounds.Dy(), dpi)
+	rect := image.Rect(0, 0, scaledBoundsx, scaledBoundsy)
+	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
 		log.Printf("Screen capture failed: %v", err)
 		return false

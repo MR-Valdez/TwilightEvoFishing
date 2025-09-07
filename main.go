@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"log"
 	"runtime"
 	"slices"
@@ -68,7 +69,7 @@ var (
 	resolution          Resolution
 	actions             = []uint16{16, 17, 18, 19, 30}
 	lastActionTime      = time.Now()
-	dpiScale            = 0
+	dpiScale            = 96
 )
 
 var resolutions = map[string]Resolution{
@@ -173,8 +174,7 @@ func initGL() {
 
 func createOverlayWindow() *glfw.Window {
 	screenBounds := screenshot.GetDisplayBounds(0)
-	screenWidth := screenBounds.Dx()
-	screenHeight := screenBounds.Dy()
+	screenWidth, screenHeight := utils.ScaleCoords(screenBounds.Dx(), screenBounds.Dy(), dpiScale)
 
 	winWidth := int(float64(screenWidth) * 0.095)
 	winHeight := int(float64(screenHeight) * 0.06)
@@ -219,19 +219,16 @@ func setupFont(screenHeight int) {
 
 func renderOverlayLoop(window *glfw.Window) {
 	prevBounds := screenshot.GetDisplayBounds(0)
-	prevWidth := prevBounds.Dx()
-	prevHeight := prevBounds.Dy()
+	prevWidth, prevHeight := utils.ScaleCoords(prevBounds.Dx(), prevBounds.Dy(), dpiScale)
 
 	for !window.ShouldClose() {
 		windowFocused = robotgo.GetTitle() == "Warcraft III"
-		screenBounds := screenshot.GetDisplayBounds(0)
-		screenWidth := screenBounds.Dx()
-		screenHeight := screenBounds.Dy()
-
 		dpiScale = utils.GetWindowDPI()
+		screenBounds := screenshot.GetDisplayBounds(0)
+		screenWidth, screenHeight := utils.ScaleCoords(screenBounds.Dx(), screenBounds.Dy(), dpiScale)
 
 		if screenWidth != prevWidth || screenHeight != prevHeight {
-			winWidth := int(float64(screenWidth) * 0.096)
+			winWidth := int(float64(screenWidth) * 0.097)
 			winHeight := int(float64(screenHeight) * 0.06)
 			window.SetSize(winWidth, winHeight)
 			window.SetPos(int(float64(screenWidth)*0.05), int(float64(screenHeight)*0.05))
@@ -333,7 +330,7 @@ func hookLogic() {
 					} else if ev.Keycode == 60999 { //Home key
 						printDebugInfo()
 					} else {
-						logDebug("Hook: %v %v %v\n", ev.Rawcode, ev.Mask, ev.Keycode)
+						logDebug("Hook: %v %v %v", ev.Rawcode, ev.Mask, ev.Keycode)
 					}
 				case hook.MouseDown:
 					if ev.Button == hook.MouseMap["center"] {
@@ -381,8 +378,8 @@ func runFishingBotLogic() {
 		}
 
 		screenBounds := screenshot.GetDisplayBounds(0)
-		screenWidth := screenBounds.Dx()
-		screenHeight := screenBounds.Dy()
+		screenWidth, screenHeight := screenBounds.Dx(), screenBounds.Dy()
+		logDebug("screenwidth:%v screenHeight:%v", screenWidth, screenHeight)
 
 		waitUntilFocused()
 		key := fmt.Sprintf("%dx%d", screenWidth, screenHeight)
@@ -414,7 +411,7 @@ func runFishingBotLogic() {
 		heroCheckx, heroChecky := utils.ScaleCoords(resolution.HeroCheck[0], resolution.HeroCheck[1], dpiScale)
 		logDebug("HeroCheck Coords x:%v y:%v", heroCheckx, heroChecky)
 		waitUntilFocused()
-		if utils.IsBlack(heroCheckx, heroChecky, screenBounds) {
+		if utils.IsBlack(heroCheckx, heroChecky, screenBounds, dpiScale) {
 			fmt.Println("⚠️ Hero is dead or not selected. Retrying...")
 			if currentTier == 5 && fishing {
 				fishing = false
@@ -460,7 +457,10 @@ func runFishingBotLogic() {
 		lastRedDetected := time.Now()
 		for {
 			waitUntilFocused()
-			img, err := screenshot.CaptureRect(screenBounds)
+			scaledBoundsx, scaledBoundsy := utils.ScaleCoords(screenBounds.Dx(), screenBounds.Dy(), dpiScale)
+			rect := image.Rect(0, 0, scaledBoundsx, scaledBoundsy)
+			img, err := screenshot.CaptureRect(rect)
+
 			if err != nil {
 				log.Printf("Screen capture failed: %v", err)
 				continue
@@ -494,7 +494,7 @@ func runFishingBotLogic() {
 					waitUntilNotTyping()
 					robotgo.KeyTap("num8")
 				}
-			} else if utils.IsBlack(heroCheckx, heroChecky, screenBounds) {
+			} else if utils.IsBlack(heroCheckx, heroChecky, screenBounds, dpiScale) {
 				break
 			}
 			time.Sleep(500 * time.Millisecond)
@@ -511,8 +511,7 @@ func runDodgeArrowLogic() {
 
 		waitUntilFocused()
 		screenBounds := screenshot.GetDisplayBounds(0)
-		screenWidth := screenBounds.Dx()
-		screenHeight := screenBounds.Dy()
+		screenWidth, screenHeight := utils.ScaleCoords(screenBounds.Dx(), screenBounds.Dy(), dpiScale)
 
 		key := fmt.Sprintf("%dx%d", screenWidth, screenHeight)
 		res, ok := resolutions[key]
@@ -531,7 +530,9 @@ func runDodgeArrowLogic() {
 			}
 
 			waitUntilNotTyping()
-			img, err := screenshot.CaptureRect(screenBounds)
+			scaledBoundsx, scaledBoundsy := utils.ScaleCoords(screenBounds.Dx(), screenBounds.Dy(), dpiScale)
+			rect := image.Rect(0, 0, scaledBoundsx, scaledBoundsy)
+			img, err := screenshot.CaptureRect(rect)
 			if err != nil {
 				log.Printf("Screen capture failed: %v", err)
 				continue
@@ -614,12 +615,13 @@ func runRefreshManaLogic() {
 }
 
 func main() {
+	dpiScale = utils.GetWindowDPI()
 	lastActionTime = time.Now()
 	initGL()
 	window := createOverlayWindow()
 	makeWindowClickThrough(window)
 	screenBounds := screenshot.GetDisplayBounds(0)
-	screenHeight := screenBounds.Dy()
+	_, screenHeight := utils.ScaleCoords(screenBounds.Dx(), screenBounds.Dy(), dpiScale)
 	setupFont(screenHeight)
 	go hookLogic()
 	go runDodgeArrowLogic()
@@ -646,7 +648,7 @@ func dropAllFish(deaths, screenWidth, screenHeight int) int {
 
 		for _, slot := range resolution.InventorySlots {
 			waitUntilFocused()
-			x, y := slot[0], slot[1]
+			x, y := utils.ScaleCoords(slot[0], slot[1], dpiScale)
 			logDebug("Inventory Mouse Coords x:%v y:%v", x, y)
 			robotgo.Move(x, y)
 			robotgo.Click("right")
